@@ -6,7 +6,6 @@ import { Button } from "@/components/Common/Button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -14,10 +13,8 @@ import {
 } from "@/components/Common/Form";
 import { Input } from "@/components/Common/Input";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import useGlobalContext from "@/hook/useGlobalContext";
 import { useRouter } from "next/router";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import clsx from "clsx";
 import { toast } from "react-toastify";
 
@@ -31,11 +28,7 @@ const FormSchema = z.object({
 });
 
 const Login = () => {
-
   const router = useRouter();
-  const { state } = useGlobalContext();
-  const session = useSession();
-
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -72,7 +65,7 @@ const Login = () => {
         )
       
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Login Failed:", error);
     }
   };

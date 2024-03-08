@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -8,7 +6,6 @@ import { Button } from "@/components/Common/Button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,7 +14,6 @@ import {
 import { Input } from "@/components/Common/Input";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import useGlobalContext from "@/hook/useGlobalContext";
 import clsx from "clsx";
 import { api } from "@/utils/api";
 import { toast } from "react-toastify";
@@ -39,8 +35,6 @@ const FormSchema = z
 
 const SignUp = () => {
   const router = useRouter();
-  const { state } = useGlobalContext();
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -52,22 +46,22 @@ const SignUp = () => {
   });
 
   const mutation = api.auth.register.useMutation({
-    onError: (e) => setErrorMessage(e.message),
-    onSuccess: () => router.push("/auth/login"),
+    onError: (e) => {
+      toast.error(e?.message, {
+        position: "top-center",
+      });
+    },
+    onSuccess: () => {
+      toast.success("successfully", {
+        position: "top-center",
+      });
+      router.push("/auth/login");
+    },
   });
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     try {
-      await mutation.mutateAsync(data).then(() => {
-        toast.success("successfully", {
-          position: 'top-center'
-        })
-      }).catch(e => {
-        toast.error(errorMessage, {
-          position: 'top-center'
-        })
-      })
-
+      await mutation.mutateAsync(data);
     } catch (e) {
       console.error("Sign Up Failed:", e);
     }
