@@ -15,7 +15,8 @@ interface Action {
 export const GlobalContext = React.createContext<IGlobalContextProps>({} as any);
 
 const initialize = {
-  walletAddress: null
+  walletAddress: null,
+  isLoading: false
 }
 
 const reducer = (state: any , action: Action ) => {

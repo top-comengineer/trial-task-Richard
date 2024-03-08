@@ -32,8 +32,11 @@ export default function Layout(props: LayoutProps) {
 
   return (
     <React.Fragment>
-      {state?.isLoading && <Spinning />}
-      <LayoutComponent>{children}</LayoutComponent>
+      {state?.isLoading ? (
+        <Spinning />
+      ) : (
+        <LayoutComponent>{children}</LayoutComponent>
+      )}
     </React.Fragment>
   );
 }

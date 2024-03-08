@@ -19,6 +19,7 @@ import useGlobalContext from "@/hook/useGlobalContext";
 import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
 import clsx from "clsx";
+import { toast } from "react-toastify";
 
 const FormSchema = z.object({
   email: z.string().email({
@@ -35,6 +36,7 @@ const Login = () => {
   const { state } = useGlobalContext();
   const session = useSession();
 
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -45,22 +47,33 @@ const Login = () => {
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     try {
-      console.log('data', data?.email, data?.password)
-      const response: any = await signIn("credentials", {
+      const response = await signIn("credentials", {
         email: data?.email,
         password: data?.password,
         redirect: false,
       });
-      console.log({ response });
+      
       if (!response?.error) {
         console.log('session => ', session)
         router.push("/");
       }
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+      if(response?.status === 401) {
+        toast.error("Email or password incorrect.", 
+          {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            }
+        )
+        console.log('status', response?.status === 401)
+      
       }
-      console.log("Login Successful", response);
     } catch (error: any) {
       console.error("Login Failed:", error);
     }

@@ -1,5 +1,5 @@
 import { Fragment, ReactNode } from "react"
-import Nav from "@/components/Nav"
+import AuthNav from "@/components/Nav/AuthNav"
 
 type BaseLayoutProps = {
   children: ReactNode
@@ -10,7 +10,7 @@ const AuthLayout = (props: BaseLayoutProps) => {
   return (
     <Fragment>
       <div className="">
-        <Nav />
+        <AuthNav />
         {children}
       </div>
     </Fragment>

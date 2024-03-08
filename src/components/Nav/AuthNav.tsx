@@ -1,11 +1,8 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Fragment, useEffect } from "react";
-import { useAccount, useDisconnect } from "wagmi";
-import { Button } from "../Common/Button";
-import useGlobalContext from "@/hook/useGlobalContext";
+import { Fragment } from "react";
+import { Button } from "@/components/Common/Button";
 import { useRouter } from "next/router";
 
-const Nav = () => {
+const AuthNav = () => {
   const router = useRouter();
 
   const handleLogin = () => {
@@ -35,4 +32,4 @@ const Nav = () => {
   );
 };
 
-export default Nav;
+export default AuthNav;

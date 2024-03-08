@@ -29,6 +29,8 @@ import {
 import "@/styles/globals.css";
 import Layout from "@/components/Layout";
 import GlobalContextProvider from "@/context/useGlobalContext/useGlobalContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -69,6 +71,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
           theme={darkTheme()}
         >
           <SessionProvider session={session}>
+            <ToastContainer limit={1} />
             <Layout>
               <Component {...pageProps} />
             </Layout>

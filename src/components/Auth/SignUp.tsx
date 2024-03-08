@@ -49,7 +49,12 @@ const SignUp = () => {
   });
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log("data", data, form.formState.errors);
+    try {
+      console.log("data", data, form.formState.errors);
+
+    } catch(e) {
+      console.error("Login Failed:", e);
+    }
   };
 
   return (

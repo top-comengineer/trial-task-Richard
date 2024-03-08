@@ -1,40 +1,35 @@
-import Nav from "@/components/Nav";
+import Nav from "@/components/Nav/AuthNav";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import useGlobalContext from "@/hook/useGlobalContext";
-import { signIn, signOut, useSession } from "next-auth/react";
-
+import { useSession } from "next-auth/react";
 
 const Dashboard = () => {
-
   const router = useRouter();
-  const {status, data: session} = useSession();
+  const { status, data: session } = useSession();
 
   const { state, dispatch } = useGlobalContext();
 
-  
   useEffect(() => {
-    const currentDate = new Date();
-    console.log('session -> ', session, status)
+    console.log("session -> ", session, status);
+    dispatch({ type: "SET_IS_LOADING", payload: true });
 
-    if(status === 'unauthenticated') {
-      router.push('/auth/login')
-    } else if(status === 'loading') {
-      dispatch({type: 'SET_IS_LOADING', payload: true})
-    } 
-    else {
-      router.push('/')
-    }
+    if (status === "unauthenticated") {
+      router.push("/auth/login");
+    } else if (status === "loading") {
+      dispatch({ type: "SET_IS_LOADING", payload: true });
+    } else {
+      router.push("/");
+    }    
+    dispatch({type: 'SET_IS_LOADING', payload: false})
 
-    dispatch({type: "SET_IS_LOADING", payload: false})
-  }, [session, status])
-
+  }, [session, status]);
 
   return (
-    <div className={"min-h-screen bg-[#0b0e13]"}>
+    <div className={"h-full bg-[#0b0e13]"}>
       <p className="text-white">DashBoard</p>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;
