@@ -40,11 +40,11 @@ const Login = () => {
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     try {
-      const response = await signIn("credentials", {
+      const response = await Promise.resolve(signIn("credentials", {
         email: data?.email,
         password: data?.password,
         redirect: false,
-      });
+      }));
       
       if (!response?.error) {
         router.push("/");

@@ -11,7 +11,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { getUser } from "./user";
+import { getUser } from "./getUser";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -37,7 +37,6 @@ declare module "next-auth" {
  *
  * @see https://next-auth.js.org/configuration/options
  */
-let counter = 0
 
 export const authOptions: NextAuthOptions = {
 
@@ -51,11 +50,10 @@ export const authOptions: NextAuthOptions = {
           email: string
           password: string
         }
-
         const user = await getUser(email, password);
 
         if(user) {
-          return {email: user.email} as any
+          return {email: user.email} as object
         }
         } catch (e) {
         return null
