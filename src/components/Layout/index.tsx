@@ -25,8 +25,12 @@ export default function Layout(props: LayoutProps) {
       LayoutComponent = AuthLayout;
       break;
 
-    default:
+    case "/dashboard":
       LayoutComponent = MainLayout;
+      break;
+
+    default:
+      LayoutComponent = AuthLayout;
       break;
   }
 

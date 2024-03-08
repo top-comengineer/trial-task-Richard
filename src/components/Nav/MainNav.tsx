@@ -1,17 +1,42 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Button } from "@/components/Common/Button";
-import { signOut } from "next-auth/react"
-import { useDisconnect } from 'wagmi'
+import { signOut, useSession } from "next-auth/react"
+import { useAccount, useDisconnect } from 'wagmi'
+import { api } from "@/utils/api";
+import {toast} from 'react-toastify'
 
 
 const MainNav = () => {
   const {disconnect} = useDisconnect();
+  const {address} = useAccount();
+  const session = useSession();
+  const [errorMessage, setErrorMessage ] = useState<string | undefined>();
+
+  const mutation = api.auth.updateWalletAddress.useMutation({
+    onError: (e) => setErrorMessage(e.message),
+    onSuccess: () => toast.success('Successfully Connected.'),
+  });
+
+  const updatedAddress = async (email: string, walletAddress: string) => {
+    const data = {
+      email: email,
+      address: walletAddress
+    }
+    await mutation.mutateAsync(data)
+  }
+
+  useEffect(() => {
+    if(session?.data?.user?.email && address) {
+      updatedAddress(session?.data?.user.email, address)
+    }
+  }, [address])
 
   const handleLogout = () => {
     disconnect();
     signOut();
   }
+
   return (
     <Fragment>
       <div className="w-full flex px-10 py-4">

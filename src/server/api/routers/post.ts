@@ -21,16 +21,16 @@ export const postRouter = createTRPCRouter({
       // simulate a slow db call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // return ctx.db.post.create({
+      // return ctx.db.user.create({
       //   data: {
-      //     name: input.name,
-      //     createdBy: { connect: { id: ctx.session.user.id } },
+      //     email: input.name,
+      //     createdBy: { connect: { id: ctx.session.user } },
       //   },
       // });
     }),
 
   getLatest: protectedProcedure.query(({ ctx }) => {
-    // return ctx.db.post.findFirst({
+    // return ctx.db.user.findFirst({
     //   orderBy: { createdAt: "desc" },
     //   where: { createdBy: { id: ctx.session.user.id } },
     // });

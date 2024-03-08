@@ -11,7 +11,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { getUser } from "./getUser";
+import { getUser } from "./user";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -52,10 +52,7 @@ export const authOptions: NextAuthOptions = {
           password: string
         }
 
-        console.log('credentials => ', credentials)
         const user = await getUser(email, password);
-
-        console.log('user ====== => ', user)
 
         if(user) {
           return {email: user.email} as any
@@ -71,7 +68,6 @@ export const authOptions: NextAuthOptions = {
   //     const { session, token } = props;
   //     // const exp = new Date(new Date().getTime() + 60*1000).toISOString();
   //     // session.expires = exp;
-  //     console.log('session => ', session, token, counter++)
   //     return session
   //   }
   // },

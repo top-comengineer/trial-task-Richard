@@ -1,15 +1,17 @@
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import type { GetServerSideProps, NextPage } from "next";
 import { getServerAuthSession } from "@/server/auth";
 
-import React from 'react'
-import Login from "@/components/Auth/Login"
+const DashBoard = () => {
+  const router = useRouter();
 
-const LoginPage = () => {
   return (
-    <div className='flex mx-auto flex-col h-screen'>
-      <Login />
+    <div className={"h-full bg-[#0b0e13]"}>
+      <p className="text-white">DashBoard</p>
     </div>
-  )
+  );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -18,7 +20,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     res: context.res,
   });
 
-  if (session) {
+  if (!session) {
     return {
       redirect: {
         destination: "/",
@@ -30,4 +32,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return { props: {} };
 };
 
-export default LoginPage; 
+export default DashBoard;

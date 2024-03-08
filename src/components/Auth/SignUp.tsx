@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -19,6 +19,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import useGlobalContext from "@/hook/useGlobalContext";
 import clsx from "clsx";
+import { api } from "@/utils/api";
+import { toast } from "react-toastify";
 
 const FormSchema = z
   .object({
@@ -38,6 +40,7 @@ const FormSchema = z
 const SignUp = () => {
   const router = useRouter();
   const { state } = useGlobalContext();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -48,12 +51,25 @@ const SignUp = () => {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    try {
-      console.log("data", data, form.formState.errors);
+  const mutation = api.auth.register.useMutation({
+    onError: (e) => setErrorMessage(e.message),
+    onSuccess: () => router.push("/auth/login"),
+  });
 
-    } catch(e) {
-      console.error("Login Failed:", e);
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    try {
+      await mutation.mutateAsync(data).then(() => {
+        toast.success("successfully", {
+          position: 'top-center'
+        })
+      }).catch(e => {
+        toast.error(errorMessage, {
+          position: 'top-center'
+        })
+      })
+
+    } catch (e) {
+      console.error("Sign Up Failed:", e);
     }
   };
 
@@ -86,9 +102,10 @@ const SignUp = () => {
                   type="email"
                   placeholder="email"
                   {...field}
-                  className={
-                    clsx(form.formState.errors.email ? "border-red-500" : "", "text-black")
-                  }
+                  className={clsx(
+                    form.formState.errors.email ? "border-red-500" : "",
+                    "text-black",
+                  )}
                 />
               </FormControl>
               <FormMessage />
@@ -107,9 +124,10 @@ const SignUp = () => {
                   type="password"
                   placeholder="password"
                   {...field}
-                  className={
-                    clsx(form.formState.errors.password ? "border-red-500" : "", "text-black")
-                  }
+                  className={clsx(
+                    form.formState.errors.password ? "border-red-500" : "",
+                    "text-black",
+                  )}
                 />
               </FormControl>
               <FormMessage />

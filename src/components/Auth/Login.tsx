@@ -54,7 +54,6 @@ const Login = () => {
       });
       
       if (!response?.error) {
-        console.log('session => ', session)
         router.push("/");
       }
 
@@ -71,7 +70,6 @@ const Login = () => {
             theme: "colored",
             }
         )
-        console.log('status', response?.status === 401)
       
       }
     } catch (error: any) {

@@ -1,5 +1,6 @@
 import verifyPassword from "@/lib/verifyPassword";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient();
 
@@ -10,18 +11,11 @@ export const getUser = async (email: string, password: string) => {
     },
   })
 
-  let users = await prisma.user.findMany();
-
-  
-  console.log('user', user, users)
   if(!user) {
     return null
   } else {
-    const isValids = await verifyPassword(user?.password, password)
+    const isValid = await verifyPassword(user?.password, password)
 
-    const isValid = (user.password === password);
-
-    console.log('isvalid', isValid);
     if(!isValid) {
       return null;
     } else {
