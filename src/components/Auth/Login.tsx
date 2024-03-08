@@ -14,6 +14,11 @@ import {
 } from "@/components/Common/Form";
 import { Input } from "@/components/Common/Input";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import useGlobalContext from "@/hook/useGlobalContext";
+import { useRouter } from "next/router";
+import { signIn, useSession } from "next-auth/react";
+import clsx from "clsx";
 
 const FormSchema = z.object({
   email: z.string().email({
@@ -25,6 +30,11 @@ const FormSchema = z.object({
 });
 
 const Login = () => {
+
+  const router = useRouter();
+  const { state } = useGlobalContext();
+  const session = useSession();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -33,15 +43,34 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log("data", data, form.formState.errors);
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    try {
+      console.log('data', data?.email, data?.password)
+      const response: any = await signIn("credentials", {
+        email: data?.email,
+        password: data?.password,
+        redirect: false,
+      });
+      console.log({ response });
+      if (!response?.error) {
+        console.log('session => ', session)
+        router.push("/");
+      }
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      console.log("Login Successful", response);
+    } catch (error: any) {
+      console.error("Login Failed:", error);
+    }
   };
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mx-auto my-auto flex w-[320px] flex-col gap-5 rounded-2xl p-10 shadow-md sm:w-[400px] md:w-[576px] lg:w-[576px]"
+        className="bg-[#181d2a] mx-auto my-auto text-white flex w-[320px] flex-col gap-5 rounded-2xl p-10 shadow-md sm:w-[400px] md:w-[576px] lg:w-[576px]"
       >
         <div className="flex flex-col gap-6 py-4">
           <p className="text-center text-3xl font-bold">Sign In</p>
@@ -49,7 +78,7 @@ const Login = () => {
             <p className="text-center text-lg">Don&apos;t have account?</p>
             <Link
               href="/auth/signup"
-              className="text-lg text-sky-400 hover:underline"
+              className="text-lg text-[#3374d9] hover:underline"
             >
               Sign Up
             </Link>
@@ -60,13 +89,13 @@ const Login = () => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base">Email *</FormLabel>
+              <FormLabel className="text-lg">Email *</FormLabel>
               <FormControl>
                 <Input
                   placeholder="email"
                   {...field}
                   className={
-                    form.formState.errors.email ? "border-red-500" : ""
+                    clsx(form.formState.errors.email ? "border-red-500" : "", "text-black")
                   }
                 />
               </FormControl>
@@ -80,14 +109,14 @@ const Login = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base">Password *</FormLabel>
+              <FormLabel className="text-lg">Password *</FormLabel>
               <FormControl>
                 <Input
                   type="password"
                   placeholder="password"
                   {...field}
                   className={
-                    form.formState.errors.password ? "border-red-500" : ""
+                    clsx(form.formState.errors.password ? "border-red-500" : "", "text-black")
                   }
                 />
               </FormControl>
@@ -97,13 +126,13 @@ const Login = () => {
         />
 
         <Link
-          href="/auth/forgot-password"
-          className="text-sm text-black hover:underline"
+          href="/auth/login"
+          className="text-sm text-white hover:underline"
         >
           Forgot your password?
         </Link>
 
-        <Button type="submit" className="mt-3 bg-sky-300 hover:bg-sky-400">
+        <Button type="submit" variant="none" className="mt-3 text-lg bg-[#3374d9] hover:bg-[#4574c0]">
           Login
         </Button>
       </form>

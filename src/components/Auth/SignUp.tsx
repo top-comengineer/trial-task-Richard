@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,21 +16,29 @@ import {
 } from "@/components/Common/Form";
 import { Input } from "@/components/Common/Input";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import useGlobalContext from "@/hook/useGlobalContext";
+import clsx from "clsx";
 
-const FormSchema = z.object({
-  email: z.string().email({
-    message: "Please enter the valid email address.",
-  }),
-  password: z.string().nonempty({
-    message: "Please enter your password.",
-  }),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Password don't match.",
-  path: ["confirmPassword"],
-});
+const FormSchema = z
+  .object({
+    email: z.string().email({
+      message: "Please enter the valid email address.",
+    }),
+    password: z.string().nonempty({
+      message: "Please enter your password.",
+    }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password don't match.",
+    path: ["confirmPassword"],
+  });
 
 const SignUp = () => {
+  const router = useRouter();
+  const { state } = useGlobalContext();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -46,7 +56,7 @@ const SignUp = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mx-auto my-auto flex w-[320px] flex-col gap-5 rounded-2xl p-10 shadow-md sm:w-[400px] md:w-[576px] lg:w-[576px]"
+        className="mx-auto my-auto flex w-[320px] flex-col gap-5 rounded-2xl bg-[#181d2a] p-10 text-white shadow-md sm:w-[400px] md:w-[576px] lg:w-[576px]"
       >
         <div className="flex flex-col gap-6 py-4">
           <p className="text-center text-3xl font-bold">Sign Up</p>
@@ -72,7 +82,7 @@ const SignUp = () => {
                   placeholder="email"
                   {...field}
                   className={
-                    form.formState.errors.email ? "border-red-500" : ""
+                    clsx(form.formState.errors.email ? "border-red-500" : "", "text-black")
                   }
                 />
               </FormControl>
@@ -93,7 +103,7 @@ const SignUp = () => {
                   placeholder="password"
                   {...field}
                   className={
-                    form.formState.errors.password ? "border-red-500" : ""
+                    clsx(form.formState.errors.password ? "border-red-500" : "", "text-black")
                   }
                 />
               </FormControl>
@@ -113,9 +123,12 @@ const SignUp = () => {
                   type="password"
                   placeholder="confirm password"
                   {...field}
-                  className={
-                    form.formState.errors.confirmPassword ? "border-red-500" : ""
-                  }
+                  className={clsx(
+                    form.formState.errors.confirmPassword
+                      ? "border-red-500"
+                      : "",
+                    "text-black",
+                  )}
                 />
               </FormControl>
               <FormMessage />
@@ -123,7 +136,11 @@ const SignUp = () => {
           )}
         />
 
-        <Button type="submit" className="mt-3 bg-sky-300 hover:bg-sky-400">
+        <Button
+          type="submit"
+          variant={"none"}
+          className="mt-3 bg-[#3374d9] text-lg hover:bg-[#4574c0]"
+        >
           SignUp
         </Button>
       </form>
