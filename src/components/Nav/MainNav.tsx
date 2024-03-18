@@ -6,7 +6,6 @@ import { useAccount, useDisconnect } from "wagmi";
 import { api } from "@/utils/api";
 import { toast } from "react-toastify";
 
-
 const MainNav = () => {
   const { disconnect } = useDisconnect();
   const { address } = useAccount();
@@ -26,7 +25,6 @@ const MainNav = () => {
     await mutation.mutateAsync(data);
   };
 
-
   useEffect(() => {
     if (session?.data?.user?.email && address) {
       updatedAddress(session?.data?.user.email, address);
@@ -40,9 +38,9 @@ const MainNav = () => {
 
   return (
     <Fragment>
-      <div className="flex w-full px-10 py-4">
-        <p className="text-3xl uppercase text-white">Defi</p>
-       
+      <div className="header flex w-full border-b-[1px] border-[#7c7089] px-10 py-4">
+        <p className="title uppercase">Defi</p>
+
         <div className="ml-auto flex gap-2">
           <ConnectButton />
 

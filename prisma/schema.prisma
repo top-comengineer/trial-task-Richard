@@ -33,7 +33,6 @@ model User {
     address       String
     // sessions      Session[]
     layouts       Layout[]
-
 }
 
 model Layout {
@@ -44,6 +43,7 @@ model Layout {
     widgets     Widget[]    @relation("LayoutWidgets")
     layoutsWidgets LayoutsWidgets[]
 }
+
 model Widget {
     widget_id          Int  @id @default(autoincrement())
     widget_name        String

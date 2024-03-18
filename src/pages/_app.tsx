@@ -26,11 +26,17 @@ import {
   darkTheme,
 } from "@rainbow-me/rainbowkit";
 
-import "@/styles/globals.css";
 import Layout from "@/components/Layout";
 import GlobalContextProvider from "@/context/useGlobalContext/useGlobalContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+import "@/styles/form.css";
+import "@/styles/form-styles.css";
+import "@/styles/clock.css";
+import "@/styles/react-grid-layout.css";
+import "@/styles/react-grid-layout2.css";
+import "@/styles/globals.css";
 
 const inter = Inter({
   subsets: ["latin"],

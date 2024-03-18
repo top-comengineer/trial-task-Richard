@@ -40,41 +40,77 @@ const Login = () => {
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     try {
-      const response = await Promise.resolve(signIn("credentials", {
-        email: data?.email,
-        password: data?.password,
-        redirect: false,
-      }));
-      
+      const response = await Promise.resolve(
+        signIn("credentials", {
+          email: data?.email,
+          password: data?.password,
+          redirect: false,
+        }),
+      );
+
       if (!response?.error) {
         router.push("/");
       }
 
-      if(response?.status === 401) {
-        toast.error("Email or password incorrect.", 
-          {
-            position: "top-center",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-            }
-        )
-      
+      if (response?.status === 401) {
+        toast.error("Email or password incorrect.", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
       }
     } catch (error) {
       console.error("Login Failed:", error);
     }
   };
 
+  // const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+  //   try {
+  //     // Assuming `signIn` is properly typed to return `LoginResponse`
+  //     const response: any = await signIn("credentials", {
+  //       email: data?.email,
+  //       password: data?.password,
+  //       redirect: false,
+  //     });
+
+  //     debugger;
+
+  //     // Check if login was successful and token is present
+  //     if (response.ok && response.token) {
+  //       // Store the token in local storage
+  //       localStorage.setItem("token", response.token);
+
+  //       // Navigate to the homepage or dashboard
+  //       router.push("/");
+  //     } else if (response.error) {
+  //       // Handle login errors (e.g., incorrect credentials)
+  //       toast.error(response.error || "Email or password incorrect.", {
+  //         position: "top-center",
+  //         autoClose: 3000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "colored",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     // Properly type the error or handle it based on your error handling strategy
+  //     console.error("Login Failed:", error);
+  //   }
+  // };
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="bg-[#181d2a] mx-auto my-auto text-white flex w-[320px] flex-col gap-5 rounded-2xl p-10 shadow-md sm:w-[400px] md:w-[576px] lg:w-[576px]"
+        className="mx-auto my-auto flex w-[320px] flex-col gap-5 rounded-2xl bg-[#181d2a] p-10 text-white shadow-md sm:w-[400px] md:w-[576px] lg:w-[576px]"
       >
         <div className="flex flex-col gap-6 py-4">
           <p className="text-center text-3xl font-bold">Sign In</p>
@@ -98,9 +134,10 @@ const Login = () => {
                 <Input
                   placeholder="email"
                   {...field}
-                  className={
-                    clsx(form.formState.errors.email ? "border-red-500" : "", "text-black")
-                  }
+                  className={clsx(
+                    form.formState.errors.email ? "border-red-500" : "",
+                    "text-black",
+                  )}
                 />
               </FormControl>
               <FormMessage />
@@ -119,9 +156,10 @@ const Login = () => {
                   type="password"
                   placeholder="password"
                   {...field}
-                  className={
-                    clsx(form.formState.errors.password ? "border-red-500" : "", "text-black")
-                  }
+                  className={clsx(
+                    form.formState.errors.password ? "border-red-500" : "",
+                    "text-black",
+                  )}
                 />
               </FormControl>
               <FormMessage />
@@ -129,14 +167,15 @@ const Login = () => {
           )}
         />
 
-        <Link
-          href="/auth/login"
-          className="text-sm text-white hover:underline"
-        >
+        <Link href="/auth/login" className="text-sm text-white hover:underline">
           Forgot your password?
         </Link>
 
-        <Button type="submit" variant="none" className="mt-3 text-lg bg-[#3374d9] hover:bg-[#4574c0]">
+        <Button
+          type="submit"
+          variant="none"
+          className="mt-3 bg-[#3374d9] text-lg hover:bg-[#4574c0]"
+        >
           Login
         </Button>
       </form>

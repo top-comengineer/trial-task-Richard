@@ -15,17 +15,21 @@ const AuthNav = () => {
 
   return (
     <Fragment>
-      <div className="fixed flex justify-between w-full px-10 py-4">
-        <p className="text-3xl uppercase text-white">Defi</p>
+      <div className="fixed flex w-full justify-between px-10 py-4">
+        <p className="title text-3xl uppercase">Defi</p>
 
         <div className="ml-auto">
-            <div className="flex gap-2">
-              <Button onClick={handleLogin}>Login</Button>
+          <div className="flex gap-2">
+            <Button onClick={handleLogin}>Login</Button>
 
-              <Button className="bg-sky-500 hover:bg-sky-600 text-center" variant='none' onClick={handleSignUp}>
-                Sign Up
-              </Button>
-            </div>
+            <Button
+              className="bg-sky-500 text-center hover:bg-sky-600"
+              variant="none"
+              onClick={handleSignUp}
+            >
+              Sign Up
+            </Button>
+          </div>
         </div>
       </div>
     </Fragment>
