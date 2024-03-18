@@ -24,7 +24,7 @@ import { useAppContext } from "../hook/useAppContext";
 import { UserWidget, Widget } from "../../types";
 import { DefaultLayout, DefaultWidgets } from "../utils/constants";
 import { apiGet } from "../utils/apiUtils";
-import { saveTabDB, saveTabLS } from "./MainPageUtils";
+import { saveTabDB, saveTabLS } from "../utils/MainPageUtils";
 import { deleteSettings } from "../hook/useWidgetSettings";
 import { generateWID, getLS } from "../utils/appUtils";
 import { isDoubleHeightWidget } from "../widgets";

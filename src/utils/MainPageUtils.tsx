@@ -1,4 +1,4 @@
-import { apiPost } from "../utils/apiUtils";
+import { apiPost } from "./apiUtils";
 
 export function saveTabLS(tab: number, userWidgets: any[], userLayout: any[]) {
   localStorage.setItem(`userLayout${tab}`, JSON.stringify(userLayout));
