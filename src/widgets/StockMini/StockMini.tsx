@@ -34,6 +34,8 @@ export default function StockMini({ wid, symbol }: Props) {
     );
   });
 
+  Chart.displayName = "Chart"
+
   return (
     <Widget
       wid={wid}

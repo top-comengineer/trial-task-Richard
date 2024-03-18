@@ -39,6 +39,8 @@ export default function StockChart({ wid, symbol }: Props) {
     );
   });
 
+  Chart.displayName = "Chart";
+  
   return (
     <Widget
       wid={wid}

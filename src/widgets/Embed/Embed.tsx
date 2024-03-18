@@ -30,6 +30,8 @@ export default function Embed({ wid }: Props) {
     );
   });
 
+  IFrame.displayName = "IFrame"
+
   return (
     <Widget
       wid={wid}

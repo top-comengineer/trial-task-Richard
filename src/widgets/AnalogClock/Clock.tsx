@@ -26,9 +26,9 @@ export default function Clock({ title, hourDiff }: Props) {
   function handleDate() {
     const date = new Date();
     date.setHours(date.getHours() + getNumber(hourDiff, 0));
-    let hours = formatTime(date.getHours());
-    let minutes = formatTime(date.getMinutes());
-    let seconds = formatTime(date.getSeconds());
+    const hours = formatTime(date.getHours());
+    const minutes = formatTime(date.getMinutes());
+    const seconds = formatTime(date.getSeconds());
     setTime({ hours, minutes, seconds });
   }
 
