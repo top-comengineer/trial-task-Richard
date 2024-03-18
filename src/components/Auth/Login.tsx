@@ -40,13 +40,12 @@ const Login = () => {
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     try {
-      const response = await Promise.resolve(
-        signIn("credentials", {
+      const response = await signIn("credentials", {
           email: data?.email,
           password: data?.password,
           redirect: false,
-        }),
-      );
+        });
+      
 
       if (!response?.error) {
         router.push("/");
@@ -68,43 +67,6 @@ const Login = () => {
       console.error("Login Failed:", error);
     }
   };
-
-  // const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-  //   try {
-  //     // Assuming `signIn` is properly typed to return `LoginResponse`
-  //     const response: any = await signIn("credentials", {
-  //       email: data?.email,
-  //       password: data?.password,
-  //       redirect: false,
-  //     });
-
-  //     debugger;
-
-  //     // Check if login was successful and token is present
-  //     if (response.ok && response.token) {
-  //       // Store the token in local storage
-  //       localStorage.setItem("token", response.token);
-
-  //       // Navigate to the homepage or dashboard
-  //       router.push("/");
-  //     } else if (response.error) {
-  //       // Handle login errors (e.g., incorrect credentials)
-  //       toast.error(response.error || "Email or password incorrect.", {
-  //         position: "top-center",
-  //         autoClose: 3000,
-  //         hideProgressBar: false,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //         theme: "colored",
-  //       });
-  //     }
-  //   } catch (error) {
-  //     // Properly type the error or handle it based on your error handling strategy
-  //     console.error("Login Failed:", error);
-  //   }
-  // };
 
   return (
     <Form {...form}>

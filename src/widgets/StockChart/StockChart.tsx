@@ -21,7 +21,6 @@ export default function StockChart({ wid, symbol }: Props) {
     setTheme(localStorage.getItem("nightwind-mode") ?? "dark");
   });
 
-  // memo: to avoid re-rendering (when moving widget)
   const Chart = memo(() => {
     return (
       <>
@@ -48,7 +47,7 @@ export default function StockChart({ wid, symbol }: Props) {
       h={json.info.h}
       cn="overflow-hidden"
       onSettings={({ settings }) => {
-        setCurrentSymbol(settings?.symbol ?? symbol); // default to symbol prop if no settings
+        setCurrentSymbol(settings?.symbol ?? symbol);
       }}
       render={() => {
         return <Chart />;

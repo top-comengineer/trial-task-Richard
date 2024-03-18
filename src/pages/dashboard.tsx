@@ -161,7 +161,6 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
 
         saveTabLS(selectedTab, newWidgets, newLayout);
         console.log(selectedTab);
-        debugger;
         setUserWidgets(newWidgets);
         setLayout(newLayout);
         console.log("data=tab", data?.tab);
@@ -258,7 +257,6 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
         xxs: newLayout,
       });
       saveTabLS(selectedTab, userWidgets, newLayout);
-      debugger;
       // console.log('added', userWidgets, newLayout);
     }
   };
