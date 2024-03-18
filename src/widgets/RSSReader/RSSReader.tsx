@@ -55,7 +55,7 @@ export default function RSSReader({ wid }: Props) {
       h={json.info.h}
       cn="overflow-hidden"
       onSettings={({ settings }) => {
-        setUrl(settings?.url);
+        setUrl(settings?.url ?? '');
       }}
       render={({ settings }) => {
         return (

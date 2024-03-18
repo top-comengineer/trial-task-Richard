@@ -56,12 +56,12 @@ export function hToPx(h: number) {
 }
 
 export function widToName(wid: string) {
-  const widgetType: string = wid.split("-")[0];
+  const widgetType: string = wid.split("-")[0] ?? '';
   return widgetType;
 }
 
 export const getSettingsApiUrl = (tab: number, wid: string) => {
-  const widgetType: string = wid.split("-")[0];
+  const widgetType: string = wid.split("-")[0] ?? '';
   // timestamp for caching many same requests at the same time (up to the same second)
   const timestamp = new Date().toISOString().split(".")[0]; // 2023-11-03T15:06:24 (removed nanosecs)
   return `/api/${widgetType}/settings?wid=${wid}&tab=${tab}&ts=${timestamp}`;
