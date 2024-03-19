@@ -32,7 +32,6 @@ export default function AddWidgetModal({ onConfirm, onCancel }: Props) {
                   className={`border-blue relative h-32 w-48 cursor-pointer rounded-md border-[1px] hover:border-gray-300`}
                   onClick={() => onClickWidget(widget)}
                   style={{
-                    background: `url(${(widget as any)?.info?.thumbnail}) no-repeat center center`,
                     backgroundSize: "cover",
                   }}
                 >

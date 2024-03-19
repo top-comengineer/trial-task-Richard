@@ -33,6 +33,7 @@ model User {
     address       String
     // sessions      Session[]
     layouts       Layout[]
+    layoutConfigs LayoutConfig[]
 }
 
 model Layout {
@@ -42,6 +43,7 @@ model Layout {
     layout_name  String
     widgets     Widget[]    @relation("LayoutWidgets")
     layoutsWidgets LayoutsWidgets[]
+    layoutConfigs LayoutConfig[] @onDelete(Cascade)
 }
 
 model Widget {
@@ -60,4 +62,16 @@ model LayoutsWidgets {
 
     @@id([layout_id, widget_id])
 
+}
+
+model LayoutConfig {
+    id          Int     @id @default(autoincrement()) // Primary key
+    layout_id   Int
+    user_id     Int
+    layout_json Json    // Assuming you want to store a JSON object
+
+    layout     Layout   @relation(fields: [layout_id], references: [layout_id])
+    user       User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+    @@unique([layout_id, user_id], name: "layout_user_unique") // Ensures combination of layout_id and user_id is unique
 }

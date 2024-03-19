@@ -64,9 +64,8 @@ export default function Widget({
       // console.log('newState', isMoving, newState);
       // setIsMoving(newState);
       // publish(PubSubEvent.MovingToast, { isMoving: newState });
-      console.log("isMoving------------", isMoving);
+
       setIsMoving((isCurrentlyMoving) => {
-        console.log("isCurrentlyMoving------------", isCurrentlyMoving);
         const newState = !isCurrentlyMoving;
         publish(PubSubEvent.MovingToast, { isMoving: newState });
         return newState;

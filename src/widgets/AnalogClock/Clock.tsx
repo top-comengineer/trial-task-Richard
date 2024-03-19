@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 // import './Clock.css';
-import { getNumber } from '../../utils/appUtils';
+import { getNumber } from "../../utils/appUtils";
 
 type Props = {
   title: string;
@@ -11,9 +11,9 @@ type Props = {
 // also see: https://codesandbox.io/s/analog-clock-using-react-idkpz
 export default function Clock({ title, hourDiff }: Props) {
   const [time, setTime] = useState({
-    hours: '00',
-    minutes: '00',
-    seconds: '00'
+    hours: "00",
+    minutes: "00",
+    seconds: "00",
   });
 
   useEffect(() => {
@@ -37,24 +37,24 @@ export default function Clock({ title, hourDiff }: Props) {
   }
 
   const secondsStyle = {
-    transform: `rotate(${parseInt(time.seconds) * 6}deg)`
+    transform: `rotate(${parseInt(time.seconds) * 6}deg)`,
   };
   const minutesStyle = {
-    transform: `rotate(${parseInt(time.minutes) * 6}deg)`
+    transform: `rotate(${parseInt(time.minutes) * 6}deg)`,
   };
   const hoursStyle = {
-    transform: `rotate(${parseInt(time.hours) * 30}deg)`
+    transform: `rotate(${parseInt(time.hours) * 30}deg)`,
   };
 
   return (
-    <div className={'clock'}>
+    <div className={"clock"}>
       <h3>{title}</h3>
-      <div className={'analog-clock bg-gray-400'}>
-        <div className={'dial seconds'} style={secondsStyle} />
-        <div className={'dial minutes'} style={minutesStyle} />
-        <div className={'dial hours'} style={hoursStyle} />
+      <div className={"analog-clock bg-gray-400"}>
+        <div className={"dial seconds"} style={secondsStyle} />
+        <div className={"dial minutes"} style={minutesStyle} />
+        <div className={"dial hours"} style={hoursStyle} />
       </div>
-      <div className={'digital-clock'}>
+      <div className={"digital-clock"}>
         {time.hours}:{time.minutes}:{time.seconds}
       </div>
     </div>

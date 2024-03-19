@@ -1,7 +1,6 @@
 import { WidgetHeight } from "./constants";
 
 export function getLS(key: string, defaultValue: any, parseJson = false) {
-  console.log("key--------", key);
   let value; //= localStorage.getItem(key);
 
   if (typeof localStorage !== "undefined") {

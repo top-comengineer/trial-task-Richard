@@ -54,70 +54,33 @@ const StockChartNoSSR = dynamic(
   },
 );
 
+type TabItem = {
+  user_id: number;
+  layout_id: number;
+  layout_name: string;
+};
+
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
   const router = useRouter();
-  const [tabs, setTabs] = useState<string[]>(["Grid 1"]);
-  // const [tabs, setTabs] = useState<string[]>(
-  //   initialTabs.length > 0
-  //     ? initialTabs.map(
-  //         (tab: { user_id: number; layout_id: string; layout_name: string }) =>
-  //           tab.layout_name,
-  //       )
-  //     : ["Grid 1"],
-  // );
+  const [tabs, setTabs] = useState<TabItem[]>([]);
   const [selectedTab, setSelectedTab] = useState<number>(0);
-  const [layoutLock, setLayoutLock] = useState<boolean[]>([false]);
+  const [selectedTabLayoutId, setSelectedTabLayoutId] = useState<
+    number | undefined
+  >(0);
 
+  const [layoutLock, setLayoutLock] = useState<boolean[]>([false]);
   const { data: session, status } = useSession();
   const [actionType, setActionType] = useState<string>("tabSwitch"); // 'tabSwitch' or 'componentChange'
-
-  // const addTab = async () => {
-  //   const newTabName = `Grid ${tabs.length + 1}`;
-
-  //   // Optimistically update UI
-  //   const optimisticTabs = [...tabs, newTabName];
-  //   const optimisticLayoutLock = [...layoutLock, false];
-  //   setTabs(optimisticTabs);
-  //   setLayoutLock(optimisticLayoutLock);
-
-  //   try {
-  //     const response = await fetch("/api/layouts", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       credentials: "include",
-  //       body: JSON.stringify({
-  //         userId: session?.user.userId,
-  //         layout_name: newTabName,
-  //       }),
-  //     });
-
-  //     if (!response.ok) {
-  //       // Rollback optimistic updates upon error
-  //       setTabs(tabs);
-  //       setLayoutLock(layoutLock);
-  //       throw new Error(`Error: ${response.statusText}`);
-  //     }
-
-  //     // If you need to update the state with response data, do it here
-  //   } catch (error) {
-  //     console.error("Failed to add tab:", error);
-  //   }
-  // };
-
-  const { tabSettings, setTabSettings } = useAppContext();
   const [modalShowed, setModalShowed] = useState(false);
-  // const [tab, setTab] = useState(0);
-  // const [tabSettings, setTabSettings] = useState<any>({});
   const [movingToastShowed, setMovingToastShowed] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
   const [userWidgets, setUserWidgets] = useState<UserWidget[]>(
     getLS(`userWidgets${selectedTab}`, DefaultWidgets, true),
   );
+
   const [layout, setLayout] = useState<Layout[]>(
     getLS(`userLayout${selectedTab}`, DefaultLayout, true),
   );
@@ -136,66 +99,125 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
     xs: getLSLayout("xs"),
     xxs: getLSLayout("xxs"),
   });
+
   const publish = usePub();
 
-  useEffect(() => {
-    // when delete or add
-    console.log("layout--------", layout);
-  }, [layout]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number>(-1);
+  const [newTabName, setNewTabName] = useState("");
+
+  if (!session) router.push("/");
 
   useEffect(() => {
-    const fetchUserSettings = async () => {
-      setIsReady(false);
+    // Function to fetch layouts
+    const fetchLayouts = async () => {
+      try {
+        const response = await fetch("/api/tabs", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // credentials: 'include' might be necessary depending on your session handling
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch tabs");
+        }
+        const data: TabItem[] = await response.json();
 
-      const token = session?.user.token ?? "";
-      if (token) {
-        // timestamp for caching many same requests at the same time (up to the same second)
-        const timestamp = new Date().toISOString().split(".")[0]; // 2023-11-03T15:06:24 (removed nanosecs)
-        const { data } = await apiGet(`/api/user/settings?ts=${timestamp}`, {});
-        const newWidgets =
-          (data?.userWidgets ?? []).length > 0
-            ? data.userWidgets
-            : DefaultWidgets;
-        const newLayout =
-          (data?.userLayout ?? []).length > 0 ? data.userLayout : DefaultLayout;
+        // Assuming 'data' is the array of layouts
+        if (data && data.length > 0) {
+          // const tabsFromApi = data.map(
+          //   (tab: {
+          //     user_id: number;
+          //     layout_id: string;
+          //     layout_name: string;
+          //   }) => tab.layout_name,
+          // );
+          setTabs(data);
+          setSelectedTab(0);
+          setSelectedTabLayoutId(data[0]?.layout_id);
 
-        saveTabLS(selectedTab, newWidgets, newLayout);
-        console.log(selectedTab);
-        setUserWidgets(newWidgets);
-        setLayout(newLayout);
-        console.log("data=tab", data?.tab);
-        // setTabSettings(data?.tab ?? {});
-      }
-      // TODO: This is a Hack: Grid didn't load col 4, force it to reload col 4.
-      setTimeout(() => {
-        setLayouts({});
-        setTimeout(() => {
-          setLayouts({
-            xl: layout,
-            lg: layout,
-            md: layout,
-            sm: layout,
-            xs: layout,
-            xxs: layout,
-          });
+          fetchUserSettings(data[0]?.layout_id);
+          debugger;
+        } else {
+          // setTabs([
+          //   {
+          //     user_id: session?.user.userId ? session?.user.userId : 1,
+          //     layout_id: 1,
+          //     layout_name: "Grid 1",
+          //   },
+          // ]);
+          // Default tab if no layouts are returned
           setIsReady(true);
-        }, 10);
-      }, 10);
+        }
+      } catch (error) {
+        console.error("Error fetching layouts:", error);
+        // setTabs([
+        //   {
+        //     user_id: session?.user.userId ? session?.user.userId : 1,
+        //     layout_id: 1,
+        //     layout_name: "Grid 1",
+        //   },
+        // ]);
+
+        // Fallback in case of an error
+        setIsReady(true);
+      }
     };
-    fetchUserSettings();
-  }, []);
-  // console.log('isReady', isReady, userWidgets, layout);
+
+    fetchLayouts();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  const fetchUserSettings = async (layout_id: number | undefined) => {
+    setIsReady(false);
+
+    const token = session?.user.token ?? "";
+    if (token) {
+      // timestamp for caching many same requests at the same time (up to the same second)
+      const timestamp = new Date().toISOString().split(".")[0]; // 2023-11-03T15:06:24 (removed nanosecs)
+      const { data } = await apiGet(
+        `/api/layout-config?layout_id=${layout_id}`,
+        {},
+      );
+
+      const newWidgets =
+        (data?.userWidgets ?? []).length > 0
+          ? data.userWidgets
+          : DefaultWidgets;
+      const newLayout =
+        (data?.userLayout ?? []).length > 0 ? data.userLayout : DefaultLayout;
+
+      saveTabLS(selectedTab, newWidgets, newLayout);
+      updateLayoutConfig(newWidgets, newLayout, layout_id);
+      console.log(selectedTab);
+      setUserWidgets(newWidgets);
+      setLayout(newLayout);
+      console.log("data=tab", data?.tab);
+    }
+
+    setTimeout(() => {
+      setLayouts({});
+      setTimeout(() => {
+        setLayouts({
+          xl: layout,
+          lg: layout,
+          md: layout,
+          sm: layout,
+          xs: layout,
+          xxs: layout,
+        });
+        setIsReady(true);
+      }, 10);
+    }, 10);
+  };
 
   useSub(PubSubEvent.Delete, async (wid: string) => {
     if (confirm("Delete this widget?") === true) {
       setActionType("componentChange");
-      // console.log('> layout', layout, userWidgets, wid);
-      // await deleteSettings(wid);
 
       const updatedUserWidgets = (userWidgets: UserWidget[]) =>
         [...userWidgets].filter((item: UserWidget) => item.wid !== wid);
-
-      console.log("updatedUserWidgets=============", updatedUserWidgets);
 
       setUserWidgets(updatedUserWidgets);
 
@@ -214,16 +236,17 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
 
   useEffect(() => {
     setUserWidgets(getLS(`userWidgets${selectedTab}`, DefaultWidgets, true));
-
-    // const [userWidgets, setUserWidgets] = useState<UserWidget[]>(
-    //   getLS(`userWidgets${selectedTab}`, DefaultWidgets, true),
-    // );
-
-    // const [layout, setLayout] = useState<Layout[]>(
-    //   getLS(`userLayout${selectedTab}`, DefaultLayout, true),
-    // );
-
+    const laout = getLS(`userLayout${selectedTab}`, DefaultLayout, true);
     setLayout(getLS(`userLayout${selectedTab}`, DefaultLayout, true));
+
+    setLayouts({
+      xl: laout,
+      lg: laout,
+      md: laout,
+      sm: laout,
+      xs: laout,
+      xxs: laout,
+    });
   }, [selectedTab]);
 
   const addWidget = (widget: Widget | null) => {
@@ -256,19 +279,119 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
         xs: newLayout,
         xxs: newLayout,
       });
+
       saveTabLS(selectedTab, userWidgets, newLayout);
-      // console.log('added', userWidgets, newLayout);
+      updateLayoutConfig(userWidgets, newLayout);
+      // Update LayoutConfig
     }
   };
 
-  const addTab = () => {
-    const newTab = `Grid ${tabs.length + 1}`;
-    setTabs([...tabs, newTab]);
-    const newLayoutLock = false;
-    setLayoutLock([...layoutLock, newLayoutLock]);
+  function handleSaveNewTabName(index: number, newName: string) {
+    // Example: Update the tab name in local state
+    const updatedTabs: TabItem[] = [...tabs];
+    if (updatedTabs && index >= 0 && index < updatedTabs.length) {
+      const tabToUpdate = updatedTabs[index];
+      // Since tabToUpdate is derived from a condition-checked index, it should not be undefined.
+      // However, TypeScript may still require assurance that tabToUpdate is not undefined.
+      if (tabToUpdate) {
+        // At this point, TypeScript understands tabToUpdate is not undefined due to the if check.
+        const updatedTab = { ...tabToUpdate, layout_name: newName };
+        // Now update the array with the updated item.
+        const newTabs = [...updatedTabs];
+        newTabs[index] = updatedTab;
+        setTabs(newTabs);
+      }
+    }
+
+    // setTabs(updatedTabs);
+
+    // Optionally, make an API call to save the new tab name in your backend
+    // fetch('/api/update-tab-name', { method: 'POST', body: JSON.stringify({ tabId: updatedTabs[index].layout_id, newName }) });
+    if (index >= 0 && index < updatedTabs.length) {
+      const tabToUpdate = updatedTabs[index];
+
+      fetch("/api/update-tab-name", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          layout_id: tabToUpdate?.layout_id, // Ensure layout_id is accessed safely
+          newName: newName,
+        }),
+        credentials: "include", // If needed for session handling
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json(); // Or handle the successful response appropriately
+        })
+        .then((data) => {
+          console.log("Success:", data);
+          // Handle success - perhaps confirming the tab update and managing any state as needed
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          // Handle failure - possibly by showing an error message or rolling back optimistic UI updates
+        });
+
+      // Assuming the rest of your logic correctly updates the UI
+    }
+
+    // Exit editing mode
+    setIsEditing(false);
+    setEditingIndex(-1);
+    setNewTabName("");
+  }
+
+  const addTab = async () => {
+    const newTabName = `Grid ${tabs.length + 1}`;
+    // Optimistically update UI
+    const optimisticTabs = [
+      ...tabs,
+      {
+        user_id: session?.user.userId ? session?.user.userId : 1,
+        layout_id: 0,
+        layout_name: newTabName,
+      },
+    ];
+    const optimisticLayoutLock = [...layoutLock, false];
+    setTabs(optimisticTabs);
+    setLayoutLock(optimisticLayoutLock);
+
+    try {
+      const response = await fetch("/api/tabs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          layout_name: newTabName,
+        }),
+      });
+
+      if (!response.ok) {
+        // Rollback optimistic updates upon error
+        setTabs(tabs);
+        setLayoutLock(layoutLock);
+
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const updatedTabs = await response.json(); // Parse the response to get the updated tabs array
+
+      // Update tabs with the response from the server
+      setTabs(updatedTabs);
+
+      // If you need to update the state with response data, do it here
+    } catch (error) {
+      console.error("Failed to add tab:", error);
+    }
   };
 
-  const handleTabDelete = (id: number) => {
+  const handleTabDelete = async (id: number) => {
     if (tabs.length > 1) {
       console.log("id", id);
       const newTabs = tabs.filter((_, index) => index !== id);
@@ -280,7 +403,34 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
       console.log("newSelectedTab", newSelectedTab);
 
       setSelectedTab(newSelectedTab);
+      setSelectedTabLayoutId(newTabs[0]?.layout_id);
       setTabs(newTabs);
+
+      try {
+        const response = await fetch(
+          "/api/tabs?layout_id=" + tabs[id]?.layout_id,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          },
+        );
+
+        if (!response.ok) {
+          // Rollback optimistic updates upon error
+          // setTabs(tabs);
+          // setLayoutLock(layoutLock);
+          throw new Error(`Error: ${response.statusText}`);
+        }
+
+        alert("Successfully Deleted");
+
+        // If you need to update the state with response data, do it here
+      } catch (error) {
+        console.error("Failed to add tab:", error);
+      }
     }
   };
 
@@ -291,6 +441,32 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
     setLayoutLock(newLayoutLock);
 
     setModalShowed(true);
+  };
+
+  const updateLayoutConfig = async (
+    userWidgets: UserWidget[],
+    newLayout: Layout[],
+    layout_id?: number,
+  ) => {
+    // selectedTab, newLayout;
+
+    try {
+      const response = await fetch("/api/layout-config", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          layout_id: layout_id ? layout_id : selectedTabLayoutId,
+          layout_json: JSON.stringify(newLayout),
+        }),
+      });
+
+      // If you need to update the state with response data, do it here
+    } catch (error) {
+      console.error("Failed to add tab:", error);
+    }
   };
 
   const onLayoutChange =
@@ -304,7 +480,7 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
       console.log("currentBreakpoint======", currentBreakpoint);
       console.log("isRedy", isReady);
       console.log(movingToastShowed);
-
+      debugger;
       if (isReady) {
         if (movingToastShowed) {
           // tab switching
@@ -312,6 +488,9 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
           if (actionType == "componentChange") {
             saveTabLS(selectedTab, userWidgets, currentLayout);
             saveTabDB(selectedTab, userWidgets, currentLayout);
+            debugger;
+            updateLayoutConfig(userWidgets, currentLayout);
+            // Update LayoutConfig
 
             localStorage.setItem(
               `userLayout${selectedTab}${currentBreakpoint}`,
@@ -320,75 +499,93 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
           }
         }
 
-        // TODO: HACK: for some reason, layout item's h was set to 1 at some point => change them back to 2
         currentLayout.forEach((item: Layout) => {
           if (isDoubleHeightWidget(item.i)) {
             item.h = 2;
           }
         });
 
-        // console.log("current layout------", currentLayout);
-        if (actionType == "componentChange")
+        if (actionType == "componentChange") {
           saveTabLS(selectedTab, userWidgets, currentLayout);
-        // debugger;
-
-        // setLayout(currentLayout);
-        // setLayouts({
-        //   xl: currentLayout,
-        //   lg: currentLayout,
-        //   md: currentLayout,
-        //   sm: currentLayout,
-        //   xs: currentLayout,
-        //   xxs: currentLayout
-        // });
-
-        // console.log('--- currentLayout', currentLayout, allLayouts, isReady);
+          updateLayoutConfig(userWidgets, currentLayout);
+        }
       }
     };
 
   return (
     <div className={"mt-4 h-full w-full overflow-auto px-10"}>
       <div className="flex">
-        <Tabs defaultValue={tabs[selectedTab]} className="w-full">
+        <Tabs defaultValue={tabs[selectedTab]?.layout_name} className="w-full">
           <TabsList className="h-auto flex-wrap">
             {tabs.map((tab, index) => (
               <div key={index}>
-                <TabsTrigger
-                  value={tab}
-                  className={clsx(
-                    "flex h-[40px] w-[100px] gap-4 rounded-t-md text-white",
-                    selectedTab === index ? "border border-[#3374d9]" : "",
-                  )}
-                  onClick={() => {
-                    setSelectedTab(index);
-                    setActionType("tabSwitch");
-                  }}
-                >
-                  {tab}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <p onClick={() => setSelectedTab(index)}>
-                        <AiOutlineMore />
-                      </p>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="mt-2 bg-[#222839]">
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem className="hover:opacity-75">
-                          <a className="text-gray-300">Rename</a>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="hover:opacity-75">
-                          <a className="text-gray-300">Duplicate</a>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="hover:opacity-75"
-                          onClick={() => handleTabDelete(index)}
+                {isEditing && editingIndex === index ? (
+                  <>
+                    <input
+                      type="text"
+                      value={newTabName}
+                      onChange={(e) => setNewTabName(e.target.value)}
+                      className="rounded-md text-black"
+                    />
+                    <Button
+                      onClick={() => {
+                        // Function to handle saving the new tab name
+                        handleSaveNewTabName(index, newTabName);
+                      }}
+                      className="ml-2 px-2 py-1 text-white"
+                    >
+                      Save
+                    </Button>
+                  </>
+                ) : (
+                  <TabsTrigger
+                    value={tab.layout_name}
+                    className={clsx(
+                      "flex h-[40px] w-[100px] gap-4 rounded-t-md text-white",
+                      selectedTab === index ? "border border-[#3374d9]" : "",
+                    )}
+                    onClick={() => {
+                      setSelectedTab(index);
+                      setSelectedTabLayoutId(tabs[index]?.layout_id);
+                      setActionType("tabSwitch");
+                    }}
+                  >
+                    {tab.layout_name}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <p
+                          onClick={() => {
+                            setSelectedTab(index);
+                            setSelectedTabLayoutId(tabs[index]?.layout_id);
+                          }}
                         >
-                          <a className="text-gray-300">Delete</a>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TabsTrigger>
+                          <AiOutlineMore />
+                        </p>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="mt-2 bg-[#222839]">
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem
+                            className="hover:opacity-75"
+                            onClick={() => {
+                              setIsEditing(true);
+                              setEditingIndex(index);
+                              setNewTabName(tab.layout_name); // Pre-fill the input with the current tab name
+                              // Make sure to stop propagation to prevent triggering tab switch
+                            }}
+                          >
+                            <a className="text-gray-300">Rename</a>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="hover:opacity-75"
+                            onClick={() => handleTabDelete(index)}
+                          >
+                            <a className="text-gray-300">Delete</a>
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TabsTrigger>
+                )}
               </div>
             ))}
 
@@ -401,7 +598,10 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
             </Button>
           </TabsList>
 
-          <TabsContent value={tabs[selectedTab] || ""} className="mt-1 w-full">
+          <TabsContent
+            value={tabs[selectedTab]?.layout_name || ""}
+            className="mt-1 w-full"
+          >
             <ResponsiveGridLayout
               draggableHandle=".draggableHandle"
               className="layout"
@@ -434,20 +634,13 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
                 xs: 480,
                 xxs: 0,
               }}
-              cols={{ xl: 4, lg: 3, md: 2, sm: 2, xs: 1, xxs: 1 }}
+              cols={{ xl: 4, lg: 4, md: 4, sm: 4, xs: 1, xxs: 1 }}
               rowHeight={200}
               // width={1600}
               margin={[20, 20]}
               onLayoutChange={onLayoutChange}
               isResizable={false}
             >
-              {/* <div key={"embed"} className={"embed"}>
-                <Embed key={`embed-main`} wid={"embed"} />
-              </div>
-              <div key={"analogclock"} className={"analogclock"}>
-                <AnalogClock key={`analogclock-main`} wid={"analogclock"} />
-              </div> */}
-
               {userWidgets.map((widget: UserWidget, idx: number) => {
                 const wid = widget?.wid ?? "";
                 const type = wid.split("-")[0];
@@ -507,22 +700,22 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
               })}
             </ResponsiveGridLayout>
 
-            <div className="flex gap-2">
-              <Button
-                className={clsx(
-                  "add-widget px-3 py-1 text-base font-light text-white",
-                )}
-                variant="none"
-                size="none"
-                onClick={() => handleLayout(selectedTab)}
-              >
-                Add Widgets
-              </Button>
-            </div>
-
-            <p className="text-white">{tabs[selectedTab]}</p>
+            <p className="text-white">{tabs[selectedTab]?.layout_name}</p>
           </TabsContent>
         </Tabs>
+
+        <div className="flex gap-2">
+          <Button
+            className={clsx(
+              "add-widget px-3 py-1 text-base font-light text-white",
+            )}
+            variant="none"
+            size="none"
+            onClick={() => handleLayout(selectedTab)}
+          >
+            Add Widgets
+          </Button>
+        </div>
 
         {modalShowed && (
           <AddWidgetModal
@@ -558,41 +751,4 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getServerAuthSession({
-    req: context.req,
-    res: context.res,
-  });
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-
-  const tabs = await db.layout.findMany({
-    where: {
-      user_id: session.user.userId,
-    },
-    // orderBy: {
-    //   createdAt: "asc", // Assuming you have a createdAt field for ordering
-    // },
-  });
-
-  console.log(tabs);
-
-  // Pass the tabs data as props
-  return {
-    props: {
-      initialTabs: tabs.map((tab) => tab.layout_name), // Adjust according to your data model
-    },
-  };
-
-  return { props: {} };
-};
-
-// export default DashBoard;
 export default dynamic(() => Promise.resolve(DashBoard), { ssr: false });

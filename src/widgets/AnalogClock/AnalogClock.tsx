@@ -1,6 +1,5 @@
 import json from './AnalogClock.json';
 import Widget from '../../components/Widget/Widget';
-import { useEffect, useState } from 'react';
 import _ from 'lodash';
 import Clock from './Clock';
 
