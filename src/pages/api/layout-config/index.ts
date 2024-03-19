@@ -12,7 +12,7 @@ export default async function handler(
 ) {
   const token = await getToken({ req });
   // General authorization check (adjust as necessary)
-  if (!token) {
+  if (!token || typeof token.userId !== 'number') {
     return res.status(401).json({ error: "You must be logged in." });
   }
 

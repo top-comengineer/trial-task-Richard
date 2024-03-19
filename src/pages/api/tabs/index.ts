@@ -35,7 +35,7 @@ export default async function handle(
   const token = await getToken({ req });
   console.log("token::::::::::", token);
   // General authorization check (adjust as necessary)
-  if (!token) {
+  if (!token || typeof token.userId !== 'number') {
     return res.status(401).json({ error: "You must be logged in." });
   }
 
