@@ -43,7 +43,7 @@ model Layout {
     layout_name  String
     widgets     Widget[]    @relation("LayoutWidgets")
     layoutsWidgets LayoutsWidgets[]
-    layoutConfigs LayoutConfig[] @onDelete(Cascade)
+    layoutConfigs LayoutConfig[]
 }
 
 model Widget {
@@ -70,7 +70,7 @@ model LayoutConfig {
     user_id     Int
     layout_json Json    // Assuming you want to store a JSON object
 
-    layout     Layout   @relation(fields: [layout_id], references: [layout_id])
+    layout     Layout   @relation(fields: [layout_id], references: [layout_id], onDelete: Cascade)
     user       User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
     @@unique([layout_id, user_id], name: "layout_user_unique") // Ensures combination of layout_id and user_id is unique
