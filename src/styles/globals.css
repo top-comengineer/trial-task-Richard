@@ -1,3 +1,75 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* 
+* {
+  border: none;
+} */
+
+body {
+  /* background-color: #7426f1; */
+  background: linear-gradient(
+    270deg,
+    rgba(98, 29, 245, 0) 50%,
+    rgba(98, 29, 245, 0.2) 100%
+  );
+
+  background-color: rgb(23 22 28 / 1) !important;
+
+  color: white;
+}
+
+.title {
+  color: rgb(148 82 247);
+  font-weight: 700;
+  font-size: 2.25rem;
+}
+
+button {
+  background-color: rgb(98 29 245);
+  font-weight: 600;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+  transition-duration: 0.1s;
+  color: rgb(242 242 245);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  border-radius: 4px;
+}
+
+.header button,
+.add-widget {
+  background-color: rgb(98 29 245) !important;
+  font-weight: 600 !important;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+  transition-duration: 0.1s;
+  color: rgb(242 242 245);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  border-radius: 4px !important;
+
+  height: 50px !important;
+}
+
+.header button,
+.add-widget:hover {
+  background-color: rgb(148 82 247) !important;
+}
+
+button:hover {
+  background-color: rgb(148 82 247);
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

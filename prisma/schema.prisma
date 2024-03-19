@@ -14,60 +14,64 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
-}
-
 // Necessary for Next auth
-model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? // @db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@unique([provider, providerAccountId])
-}
-
-model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+// model Session {
+//     id           String   @id @default(cuid())
+//     sessionToken String   @unique
+//     userId       String
+//     expires      DateTime
+//     user         User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+// }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+    user_id       Int  @id @default(autoincrement())
+    email         String   @unique
+    // emailVerified DateTime?
+    // image         String?
+    // accounts      Account[]
+    password      String
+    address       String
+    // sessions      Session[]
+    layouts       Layout[]
+    layoutConfigs LayoutConfig[]
 }
 
-model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+model Layout {
+    layout_id    Int  @id @default(autoincrement())
+    user_id      Int
+    user         User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+    layout_name  String
+    widgets     Widget[]    @relation("LayoutWidgets")
+    layoutsWidgets LayoutsWidgets[]
+    layoutConfigs LayoutConfig[]
+}
 
-    @@unique([identifier, token])
+model Widget {
+    widget_id          Int  @id @default(autoincrement())
+    widget_name        String
+    widget_description String?
+    layouts            Layout[]  @relation("LayoutWidgets")
+    layoutsWidgets LayoutsWidgets[]
+}
+
+model LayoutsWidgets {
+    layout_id  Int
+    widget_id  Int
+    layout     Layout   @relation(fields: [layout_id], references: [layout_id])
+    widget     Widget   @relation(fields: [widget_id], references: [widget_id])
+
+    @@id([layout_id, widget_id])
+
+}
+
+model LayoutConfig {
+    id          Int     @id @default(autoincrement()) // Primary key
+    layout_id   Int
+    user_id     Int
+    layout_json Json    // Assuming you want to store a JSON object
+
+    layout     Layout   @relation(fields: [layout_id], references: [layout_id], onDelete: Cascade)
+    user       User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+    @@unique([layout_id, user_id], name: "layout_user_unique") // Ensures combination of layout_id and user_id is unique
 }
