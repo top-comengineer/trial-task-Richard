@@ -77,13 +77,9 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
   const [movingToastShowed, setMovingToastShowed] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  const [userWidgets, setUserWidgets] = useState<UserWidget[]>(
-    getLS(`userWidgets${selectedTab}`, DefaultWidgets, true),
-  );
+  const [userWidgets, setUserWidgets] = useState<UserWidget[]>([]);
 
-  const [layout, setLayout] = useState<Layout[]>(
-    getLS(`userLayout${selectedTab}`, DefaultLayout, true),
-  );
+  const [layout, setLayout] = useState<Layout[]>([]);
 
   const [currentBreakpoint, setCurrentBreakpoint] = useState("");
 
@@ -139,7 +135,30 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
           setSelectedTabLayoutId(data[0]?.layout_id);
 
           fetchUserSettings(data[0]?.layout_id);
-          debugger;
+          setIsReady(true);
+
+          const firstBtnInterval = setInterval(() => {
+            const knownIdPart = `-trigger-${data[0]?.layout_name}`;
+            const button = document.querySelector(`[id$="${knownIdPart}"]`);
+            // const button = document.getElementById(
+            //   "radix-:r3:-trigger-" + data[0]?.layout_name,
+            // );
+
+            console.log(button);
+            if (button) {
+              // Create a 'mousedown' event
+              // alert();
+              const mouseDownEvent = new MouseEvent("mousedown", {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+              });
+              // Dispatch the 'mousedown' event to simulate holding the button
+              button.dispatchEvent(mouseDownEvent);
+
+              clearInterval(firstBtnInterval);
+            }
+          }, 500);
         } else {
           // setTabs([
           //   {
@@ -176,10 +195,19 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
     if (token) {
       // timestamp for caching many same requests at the same time (up to the same second)
       const timestamp = new Date().toISOString().split(".")[0]; // 2023-11-03T15:06:24 (removed nanosecs)
-      const { data } = await apiGet(
+
+      const response = await fetch(
         `/api/layout-config?layout_id=${layout_id}`,
-        {},
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        },
       );
+
+      const data = await response.json();
 
       const newWidgets =
         (data?.userWidgets ?? []).length > 0
@@ -188,28 +216,39 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
       const newLayout =
         (data?.userLayout ?? []).length > 0 ? data.userLayout : DefaultLayout;
 
+      console.log("newLayout--------,", newLayout);
       saveTabLS(selectedTab, newWidgets, newLayout);
       updateLayoutConfig(newWidgets, newLayout, layout_id);
       console.log(selectedTab);
       setUserWidgets(newWidgets);
       setLayout(newLayout);
+      setLayouts({
+        xl: newLayout,
+        lg: newLayout,
+        md: newLayout,
+        sm: newLayout,
+        xs: newLayout,
+        xxs: newLayout,
+      });
       console.log("data=tab", data?.tab);
     }
 
-    setTimeout(() => {
-      setLayouts({});
-      setTimeout(() => {
-        setLayouts({
-          xl: layout,
-          lg: layout,
-          md: layout,
-          sm: layout,
-          xs: layout,
-          xxs: layout,
-        });
-        setIsReady(true);
-      }, 10);
-    }, 10);
+    // setTimeout(() => {
+    //   setLayouts({});
+    //   setTimeout(() => {
+    //     setLayouts({
+    //       xl: layout,
+    //       lg: layout,
+    //       md: layout,
+    //       sm: layout,
+    //       xs: layout,
+    //       xxs: layout,
+    //     });
+    //     setIsReady(true);
+    //   }, 10);
+    // }, 10);
+
+    setIsReady(true);
   };
 
   useSub(PubSubEvent.Delete, async (wid: string) => {
@@ -235,18 +274,18 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
   });
 
   useEffect(() => {
-    setUserWidgets(getLS(`userWidgets${selectedTab}`, DefaultWidgets, true));
+    // setUserWidgets(getLS(`userWidgets${selectedTab}`, DefaultWidgets, true));
     const laout = getLS(`userLayout${selectedTab}`, DefaultLayout, true);
-    setLayout(getLS(`userLayout${selectedTab}`, DefaultLayout, true));
+    // setLayout(getLS(`userLayout${selectedTab}`, DefaultLayout, true));
 
-    setLayouts({
-      xl: laout,
-      lg: laout,
-      md: laout,
-      sm: laout,
-      xs: laout,
-      xxs: laout,
-    });
+    // setLayouts({
+    //   xl: laout,
+    //   lg: laout,
+    //   md: laout,
+    //   sm: laout,
+    //   xs: laout,
+    //   xxs: laout,
+    // });
   }, [selectedTab]);
 
   const addWidget = (widget: Widget | null) => {
@@ -480,7 +519,7 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
       console.log("currentBreakpoint======", currentBreakpoint);
       console.log("isRedy", isReady);
       console.log(movingToastShowed);
-      debugger;
+
       if (isReady) {
         if (movingToastShowed) {
           // tab switching
@@ -488,8 +527,9 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
           if (actionType == "componentChange") {
             saveTabLS(selectedTab, userWidgets, currentLayout);
             saveTabDB(selectedTab, userWidgets, currentLayout);
-            debugger;
+
             updateLayoutConfig(userWidgets, currentLayout);
+
             // Update LayoutConfig
 
             localStorage.setItem(
@@ -505,9 +545,9 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
           }
         });
 
-        if (actionType == "componentChange") {
-          saveTabLS(selectedTab, userWidgets, currentLayout);
-          updateLayoutConfig(userWidgets, currentLayout);
+        if (actionType == "tabSwitch") {
+          // saveTabLS(selectedTab, userWidgets, currentLayout);
+          // updateLayoutConfig(userWidgets, currentLayout);
         }
       }
     };
@@ -545,9 +585,13 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
                       selectedTab === index ? "border border-[#3374d9]" : "",
                     )}
                     onClick={() => {
+                      setLayouts({});
+                      setUserWidgets([]);
+
                       setSelectedTab(index);
                       setSelectedTabLayoutId(tabs[index]?.layout_id);
                       setActionType("tabSwitch");
+                      fetchUserSettings(tabs[index]?.layout_id);
                     }}
                   >
                     {tab.layout_name}
@@ -605,21 +649,20 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
             <ResponsiveGridLayout
               draggableHandle=".draggableHandle"
               className="layout"
-              // layout={layout}
               // layouts={{ xl: layout, lg: layout, md: layout, sm: layout, xs: layout, xxs: layout }}
               layouts={layouts}
               onBreakpointChange={(newBreakpoint, newCols) => {
                 if (newBreakpoint !== currentBreakpoint) {
                   // if changed => save LG; load & setLayout LG
-                  setLayout(getLSLayout(newBreakpoint));
-                  setLayouts({
-                    xl: getLSLayout("xl"),
-                    lg: getLSLayout("lg"),
-                    md: getLSLayout("md"),
-                    sm: getLSLayout("sm"),
-                    xs: getLSLayout("xs"),
-                    xxs: getLSLayout("xxs"),
-                  });
+                  // setLayout(getLSLayout(newBreakpoint));
+                  // setLayouts({
+                  //   xl: getLSLayout("xl"),
+                  //   lg: getLSLayout("lg"),
+                  //   md: getLSLayout("md"),
+                  //   sm: getLSLayout("sm"),
+                  //   xs: getLSLayout("xs"),
+                  //   xxs: getLSLayout("xxs"),
+                  // });
                 }
                 setCurrentBreakpoint(newBreakpoint);
                 // console.log('onBreakpointChange', newBreakpoint, newCols);
@@ -699,8 +742,6 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
                 }
               })}
             </ResponsiveGridLayout>
-
-            <p className="text-white">{tabs[selectedTab]?.layout_name}</p>
           </TabsContent>
         </Tabs>
 
@@ -721,29 +762,6 @@ const DashBoard = ({ initialTabs }: { initialTabs: any }) => {
           <AddWidgetModal
             onCancel={() => setModalShowed(false)}
             onConfirm={addWidget}
-          />
-        )}
-
-        {movingToastShowed && (
-          <Toast
-            content={
-              <>
-                <div>
-                  <div className="text-black">
-                    Drag & Drop widgets to move them
-                  </div>
-                  <span
-                    role="button"
-                    className="link-minor text-black underline"
-                    onClick={() => publish(PubSubEvent.Moving, { stop: true })}
-                  >
-                    I'm done moving
-                  </span>
-                </div>
-              </>
-            }
-            success
-            onDismiss={() => setMovingToastShowed(false)}
           />
         )}
       </div>

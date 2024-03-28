@@ -33,9 +33,8 @@ export default async function handle(
   res: NextApiResponse,
 ) {
   const token = await getToken({ req });
-  console.log("token::::::::::", token);
   // General authorization check (adjust as necessary)
-  if (!token || typeof token.userId !== 'number') {
+  if (!token || typeof token.userId !== "number") {
     return res.status(401).json({ error: "You must be logged in." });
   }
 
@@ -135,7 +134,7 @@ async function deleteLayout(
 ) {
   const { layout_id } = req.query;
 
-  console.log("layout_id", layout_id);
+  // console.log("layout_id", layout_id);
   try {
     await prisma.layoutConfig.deleteMany({
       where: {
